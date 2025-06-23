@@ -69,7 +69,7 @@ def get_faiss_index(session_id: str):
     if session_id not in faiss_indices:
         dimension = 384  # Dimension of the embeddings
         faiss_indices[session_id] = faiss.IndexFlatL2(dimension)
-        faiss_stores[session_id] = {}
+        faiss_stores[session_id] = []
     return faiss_indices[session_id], faiss_stores[session_id]
 
 
@@ -86,12 +86,12 @@ def store_in_faiss(data_tuple, query_type, session_id):
     embedding_vector = embedding.embed_query(text)
     embedding_vector = np.array(embedding_vector).reshape(1, -1)
     index.add(embedding_vector)
-    faiss_store[text] = embedding_vector
+    faiss_store.append(text)
     print(f"Added to FAISS for session {session_id}: {text}")
 
 
 def search_faiss(query_text, session_id):
-    index, _ = get_faiss_index(session_id)
+    index, faiss_store = get_faiss_index(session_id)
 
     query_vector = embedding.embed_query(query_text)
     query_vector = np.array(query_vector).reshape(1, -1)
@@ -102,10 +102,9 @@ def search_faiss(query_text, session_id):
         return []
 
     results = []
-    faiss_store = faiss_stores.get(session_id, {})
     for idx in indices[0]:
         if 0 <= idx < len(faiss_store):
-            results.append(list(faiss_store.keys())[idx])
+            results.append(faiss_store[idx])
 
     return results
 
@@ -117,10 +116,10 @@ def search_faiss(query_text, session_id):
 
 # Regex patterns
 # 10 digit phone number
-PHONE_PATTERN = re.compile(r'\b\d{4}\s\d{3}\s\d{3}\b')
+PHONE_PATTERN = re.compile(r'\b\d{10}\b')
 
 # 5 digit number followed by 3 uppercase letters
-ORDER_ID_PATTERN = re.compile(r'\b\d{4}\b')
+ORDER_ID_PATTERN = re.compile(r'\b\d{5}[A-Z]{3}\b')
 
 def extract_issue_from_response(response_text: str):
     # Example pattern to extract the issue; adjust as needed
@@ -240,6 +239,7 @@ async def invoke_chat(request: Request):
     phone_number = find_phone_number(content)
     if phone_number:
         customer = query_customer(phone_number)
+        print(customer)
         if customer:
             store_in_faiss(data_tuple=customer, query_type='customer', session_id=session_id)
         else:
