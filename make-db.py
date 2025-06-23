@@ -4,7 +4,9 @@ import string
 
 # Function to generate patterned IDs
 def generate_order_id():
-    return f"{random.randint(1000, 9999)}"
+    number_part = random.randint(10000, 99999)
+    letters_part = ''.join(random.choices(string.ascii_uppercase, k=3))
+    return f"{number_part}{letters_part}"
 
 def generate_product_id():
     number_part = random.randint(1000, 9999)
@@ -86,9 +88,9 @@ CREATE TABLE IF NOT EXISTS orderDetails (
 
 # Insert sample records into customers table
 customers = [
-    (generate_user_id(), 'Dhairya', 'Arora', 'dhairya2arora@gmail.com', '9811 264 318', '357, Hakikat Nagar, Delhi-110009'),
-    (generate_user_id(), 'Yash', 'Khattar', 'yashkhattar73@gmail.com', '8448 721 780', 'Gurugram, Haryana'),
-    (generate_user_id(), 'Mahak', 'Arora', 'aroradhairya4@gmail.com', '9811 264 317', '357, Hakikat Nagar, Delhi-110009'),
+    (generate_user_id(), 'Dhairya', 'Arora', 'dhairya2arora@gmail.com', '9811264318', '357, Hakikat Nagar, Delhi-110009'),
+    (generate_user_id(), 'Yash', 'Khattar', 'yashkhattar73@gmail.com', '8448721780', 'Gurugram, Haryana'),
+    (generate_user_id(), 'Yash', 'Khattar', 'yashkhattar83@gmail.com', '8448721745', 'Gurugram, Haryana'),
     (generate_user_id(), 'Ravi', 'Sharma', 'ravi.sharma@example.com', '9876543210', 'Noida, Uttar Pradesh'),
     (generate_user_id(), 'Sneha', 'Patel', 'sneha.patel@example.com', '9988776655', 'Mumbai, Maharashtra')
 ]
